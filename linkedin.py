@@ -1,4 +1,4 @@
-# coding=utf-8
+'XXX'# coding=utf-8
 
 from oauth2 import Client, Token, Consumer
 import urllib
@@ -103,3 +103,9 @@ def _id_generator(people):
         id = [n.data for n in p.getElementsByTagName('id')[0].childNodes if n.nodeType == n.TEXT_NODE][0]
         if id != 'private':
             yield id
+            
+            
+def _profile_generator(people):
+    for p in people:
+        url = [n.data for n in p.getElementsByTagName('public-profile-url')[0].childNodes if n.nodeType == n.TEXT_NODE][0]
+        yield url
