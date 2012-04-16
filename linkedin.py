@@ -2,8 +2,10 @@
 
 from oauth2 import Client, Token, Consumer
 import urllib
-from xml.dom.minidom import parseString,NodeList
-import xml.etree.ElementTree as ET
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
 
 __author__= 'Javier Cordero Martinez'
 __license__ = "GPL"
@@ -68,7 +70,7 @@ def do_search(keywords=None, company=None):
 
 
     xml = ET.fromstring(response[1])
-
+    return response
     total = int(xml.find('people').attrib['total'])
     count = int(xml.find('people').attrib['count']) if xml.find('people').attrib.get('count') else total
     people = xml.findall('people/person')
