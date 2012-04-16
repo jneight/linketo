@@ -21,11 +21,11 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-consumer_key    =   'XXX'
-consumer_secret =   'XXX'
+consumer_key    =   'gg7fgmfpa1qe'
+consumer_secret =   'oYlW0YBGfiS6srXk'
 
-oauth_token        = 'XXX'
-oauth_token_secret = 'XXX'
+oauth_token        = 'b14df9e7-0860-47db-9e12-7b5a8988fb62'
+oauth_token_secret = '2ce24852-f526-4822-824e-5d394139fe65'
      
 # the URLs we will use
 request_token_url = 'https://api.linkedin.com/uas/oauth/requestToken'
