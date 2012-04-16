@@ -119,5 +119,5 @@ def _profile_generator(people):
     for p in people:
         d = {}
         for e in p.getiterator():
-            d.update({e.tag:"".join(e.text)})
+            d.update({e.tag:e.text})
         yield d
