@@ -1,12 +1,5 @@
 # coding=utf-8
 
-from oauth2 import Client, Token, Consumer
-import urllib
-try:
-    import xml.etree.cElementTree as ET
-except ImportError:
-    import xml.etree.ElementTree as ET
-
 __author__= 'Javier Cordero Martinez'
 __license__ = "GPL"
 __version__ = "0.1"
@@ -21,7 +14,12 @@ __status__ = "Development"
         Use facets for location
 """    
 
-
+from oauth2 import Client, Token, Consumer
+import urllib
+try:
+    import xml.etree.cElementTree as ET
+except ImportError:
+    import xml.etree.ElementTree as ET
 
 consumer_key    =   'XXX'
 consumer_secret =   'XXX'
@@ -67,10 +65,10 @@ def do_search(keywords=None, company=None):
         url += '&company-name=%s' % encoded_company
         
     response = linkedin_client.request(url)
-
+    if response[0]['status'] != '200':
+            return Exception("Error conectando con linkedin")
 
     xml = ET.fromstring(response[1])
-    return response
     total = int(xml.find('people').attrib['total'])
     count = int(xml.find('people').attrib['count']) if xml.find('people').attrib.get('count') else total
     people = xml.findall('people/person')
