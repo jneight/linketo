@@ -66,9 +66,8 @@ def do_search(keywords=None, company=None):
         
     response = linkedin_client.request(url)
     if response[0]['status'] != '200':
-            return Exception("Error conectando con linkedin")
-
-    xml = ET.fromstring(response[1])
+        raise Exception("Error conectando con linkedin")
+    xml = ET.fromstringlist(response[1], parser=ET.XMLParser(encoding='UTF-8'))
     total = int(xml.find('people').attrib['total'])
     count = int(xml.find('people').attrib['count']) if xml.find('people').attrib.get('count') else total
     people = xml.findall('people/person')
@@ -116,10 +115,9 @@ def _profile_url_generator(people):
 
 def _profile_generator(people):
     # id,first-name,last-name,public-profile-url,location,three-current-positions,primary-twitter-account
+    import json
     for p in people:
         d = {}
         for e in p.getiterator():
-            d.update({e.tag:e.text})
+            d.update({e.tag:"".join(e.text)})
         yield d
-
-        
