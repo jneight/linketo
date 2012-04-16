@@ -1,8 +1,9 @@
-'XXX'# coding=utf-8
+# coding=utf-8
 
 from oauth2 import Client, Token, Consumer
 import urllib
 from xml.dom.minidom import parseString,NodeList
+import xml.etree.ElementTree as ET
 
 __author__= 'Javier Cordero Martinez'
 __license__ = "GPL"
@@ -47,6 +48,7 @@ linkedin_client = Client(consumer = consumer,
                      token = token,
                      )
 
+
 def do_search(keywords=None, company=None):
     """
         Do a people-search, with keywords and/or company name.
@@ -63,27 +65,29 @@ def do_search(keywords=None, company=None):
         url += '&company-name=%s' % encoded_company
         
     response = linkedin_client.request(url)
-    if response[0]['status'] != '200':
-        return response
 
-    xml = parseString(response[1])
-    total = int(xml.getElementsByTagName('people')[0].getAttribute('total'))
-    count = int(xml.getElementsByTagName('people')[0].getAttribute('count')) if xml.getElementsByTagName('people')[0].getAttribute('count') else total
-    people = xml.getElementsByTagName('person')
+
+    xml = ET.fromstring(response[1])
+
+    total = int(xml.find('people').attrib['total'])
+    count = int(xml.find('people').attrib['count']) if xml.find('people').attrib.get('count') else total
+    people = xml.findall('people/person')
     while count<total:
-        response = linkedin_client.request('%s:(people:(id,first-name,last-name,location),facets:(code),num-results)?keywords=%s&start=%s&count=25&facet=location,es:0' % (linkedin_search_url,encoded_keywords,count))
+        url2 = url + '&start=%s' % count
+        response = linkedin_client.request(url2)
         if response[0]['status'] != '200':
             raise Exception("Error conectando con linkedin")
-        xml2 = parseString(response[1])
+        xml = ET.fromstring(response[1])
         try:
-            count += int(xml2.getElementsByTagName('people')[0].getAttribute('count'))
+            count += int(xml.find('people').attrib['count']) if xml.find('people').attrib.get('count') else total
         except: # list is empty
             break
-        people.extend(xml2.getElementsByTagName('person'))
+        people.extend(xml.findall('people/person'))
     return total, people
 
+
 def do_search_profile(people):
-    result = NodeList()
+    result = []
     for id in _id_generator(people):
         response = linkedin_client.request('%(url)s/id=%(id)s:(id,public-profile-url,formatted-name,location,three-current-positions,primary-twitter-account)' % {'url': linkedin_people_url,
                                                                                    'id': id
@@ -93,19 +97,29 @@ def do_search_profile(people):
             continue
         elif response[0]['status'] != '200':
             return response
-        xml = parseString(response[1])
-        result.append(xml.getElementsByTagName('person'))
+        result.append(ET.fromstring(response[1]))
     return result
     
     
 def _id_generator(people):
     for p in people:
-        id = [n.data for n in p.getElementsByTagName('id')[0].childNodes if n.nodeType == n.TEXT_NODE][0]
+        id = p.find('id').text
         if id != 'private':
             yield id
             
             
-def _profile_generator(people):
+def _profile_url_generator(people):
     for p in people:
-        url = [n.data for n in p.getElementsByTagName('public-profile-url')[0].childNodes if n.nodeType == n.TEXT_NODE][0]
-        yield url
+        #url = p.find('public-profile-url').text
+        if p.find('public-profile-url') is not None:
+            yield p.find('public-profile-url').text
+
+def _profile_generator(people):
+    # id,first-name,last-name,public-profile-url,location,three-current-positions,primary-twitter-account
+    for p in people:
+        d = {}
+        for e in p.getiterator():
+            d.update({e.tag:e.text})
+        yield d
+
+        
