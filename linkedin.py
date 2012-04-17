@@ -58,10 +58,12 @@ def do_search(keywords=None, company=None):
     """
     url = '%s:(people:(id,first-name,last-name,public-profile-url,location,three-current-positions,primary-twitter-account),facets:(code),num-results)?count=25&facet=location,es:0' % (linkedin_search_url)
     if keywords:
-        encoded_keywords = urllib.quote(keywords)
+        keywords = company.decode('utf8')
+        encoded_keywords = urllib.quote(keywords.encode("utf8"))
         url += '&keywords=%s' % encoded_keywords
     if company:
-        encoded_company = urllib.quote(company)
+        company = company.decode('utf8')
+        encoded_company = urllib.quote(company.encode("utf8"))
         url += '&company-name=%s' % encoded_company
         
     response = linkedin_client.request(url)
