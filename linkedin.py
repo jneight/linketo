@@ -114,8 +114,7 @@ def _profile_url_generator(people):
             yield p.find('public-profile-url').text
 
 def _profile_generator(people):
-    # id,first-name,last-name,public-profile-url,location,three-current-positions,primary-twitter-account
-    import json
+    # id,first-name,last-name,public-profile-url,location,three-current-positions,primary-twitter-account    
     for p in people:
         d = {}
         for e in p.getiterator():
