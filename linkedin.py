@@ -21,11 +21,11 @@ try:
 except ImportError:
     import xml.etree.ElementTree as ET
 
-consumer_key    =   'XXX'
-consumer_secret =   'XXX'
+consumer_key    =   'gg7fgmfpa1qe'
+consumer_secret =   'oYlW0YBGfiS6srXk'
 
-oauth_token        = 'XXX'
-oauth_token_secret = 'XXX'
+oauth_token        = 'b14df9e7-0860-47db-9e12-7b5a8988fb62'
+oauth_token_secret = '2ce24852-f526-4822-824e-5d394139fe65'
      
 # the URLs we will use
 request_token_url = 'https://api.linkedin.com/uas/oauth/requestToken'
@@ -88,7 +88,7 @@ def do_search(keywords=None, company=None):
 def do_search_profile(people):
     result = []
     for id in _id_generator(people):
-        response = linkedin_client.request('%(url)s/id=%(id)s:(id,public-profile-url,formatted-name,location,three-current-positions,primary-twitter-account)' % {'url': linkedin_people_url,
+        response = linkedin_client.request('%(url)s/id=%(id)s:(id,public-profile-url,formatted-name,location:(name),three-current-positions,primary-twitter-account)' % {'url': linkedin_people_url,
                                                                                    'id': id
                                                                                    }
                                        )
@@ -116,7 +116,29 @@ def _profile_url_generator(people):
 def _profile_generator(people):
     # id,first-name,last-name,public-profile-url,location,three-current-positions,primary-twitter-account    
     for p in people:
-        d = {}
-        for e in p.getiterator():
-            d.update({e.tag:e.text})
+        d = {
+             'id': p.find('id').text,
+             'first-name': p.find('first-name').text,
+             'last-name': p.find('last-name').text,
+             'public-profile-url': p.find('public-profile-url').text,
+             'location': {'name': p.find('location/name').text,
+                          'country': p.find('location/country').text,
+                          'code': p.find('location/country/code').text,
+                          },
+             'three-current-positions': {
+                                         'total': p.find('three-current-positions').attrib['total'],
+                                         'positions': [],
+                                         }
+             }
+        positions = p.findall('three-current-positions/position')
+        for position in positions:
+            d['three-current-positions']['positions'].append(
+                                                             {'id': position.find('id').text if position.find('id') is not None else '',
+                                                              'title': position.find('title').text if position.find('title') is not None else '',
+                                                              'summary': position.find('summary').text if position.find('summary') is not None else '',
+                                                              'size': position.find('company/size').text if position.find('company/size') is not None else '',
+                                                              'company': position.find('company/name').text if position.find('company') is not None else '',
+                                                              }
+                                                             )
+            
         yield d
