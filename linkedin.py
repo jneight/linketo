@@ -59,11 +59,11 @@ def do_search(keywords=None, company=None):
     url = '%s:(people:(id,first-name,last-name,public-profile-url,location,three-current-positions,primary-twitter-account),facets:(code),num-results)?count=25&facet=location,es:0' % (linkedin_search_url)
     if keywords:
         keywords = company.decode('utf8')
-        encoded_keywords = urllib.quote(keywords.encode("utf8"))
+        encoded_keywords = urllib.quote(keywords.encode("utf8",'ignore'))
         url += '&keywords=%s' % encoded_keywords
     if company:
         company = company.decode('utf8')
-        encoded_company = urllib.quote(company.encode("utf8"))
+        encoded_company = urllib.quote(company.encode("utf8",'ignore'))
         url += '&company-name=%s' % encoded_company
         
     response = linkedin_client.request(url)
@@ -122,13 +122,13 @@ def _profile_generator(people):
              'id': p.find('id').text,
              'first-name': p.find('first-name').text,
              'last-name': p.find('last-name').text,
-             'public-profile-url': p.find('public-profile-url').text,
-             'location': {'name': p.find('location/name').text,
-                          'country': p.find('location/country').text,
-                          'code': p.find('location/country/code').text,
+             'public-profile-url': p.find('public-profile-url').text if p.find('public-profile-url') is not None else None,
+             'location': {'name': p.find('location/name').text if p.find('location/name') is not None else None,
+                          'country': p.find('location/country').text if p.find('location/country') is not None else None,
+                          'code': p.find('location/country/code').text if p.find('location/country/code') is not None else None, 
                           },
              'three-current-positions': {
-                                         'total': p.find('three-current-positions').attrib['total'],
+                                         'total': p.find('three-current-positions').attrib['total'] if p.find('three-current-positions') is not None else 0,
                                          'positions': [],
                                          }
              }
