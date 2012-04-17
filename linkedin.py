@@ -67,7 +67,7 @@ def do_search(keywords=None, company=None):
     response = linkedin_client.request(url)
     if response[0]['status'] != '200':
         raise Exception("Error conectando con linkedin")
-    xml = ET.fromstringlist(response[1], parser=ET.XMLParser(encoding='UTF-8'))
+    xml = ET.fromstring(response[1])
     total = int(xml.find('people').attrib['total'])
     count = int(xml.find('people').attrib['count']) if xml.find('people').attrib.get('count') else total
     people = xml.findall('people/person')
